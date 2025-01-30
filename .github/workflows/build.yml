@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    if: github.actor == 'YourGitHubUsername'  # Replace with your GitHub username
+    if: github.actor == 'GivenFLY'  # Replace with your GitHub username
 
     steps:
       - name: Checkout Repository
