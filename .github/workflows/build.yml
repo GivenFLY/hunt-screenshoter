@@ -32,11 +32,19 @@ jobs:
         id: get_version
         run: echo "::set-output name=VERSION::$(poetry version -s)"
 
-      - name: Build EXE with PyInstaller
+      - name: Install Dependencies (PyInstaller + PyArmor)
         run: |
           poetry install
-          poetry run pip install pyinstaller
-          poetry run pyinstaller --onefile main.py
+          poetry run pip install pyinstaller pyarmor
+
+      - name: Obfuscate Code with PyArmor
+        run: |
+          mkdir obf
+          poetry run pyarmor obfuscate --exact main.py -O obf
+
+      - name: Build EXE with PyInstaller (Disable UPX, Keep Console)
+        run: |
+          poetry run pyinstaller --onefile --noupx obf/main.py
 
       - name: Rename EXE
         run: mv dist/main.exe dist/main-${{ steps.get_version.outputs.VERSION }}.exe
