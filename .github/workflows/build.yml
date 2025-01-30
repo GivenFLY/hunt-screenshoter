@@ -1,12 +1,16 @@
 name: Build and Release EXE
 
 on:
-  workflow_dispatch:  # Only runs when manually triggered
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
-    if: github.actor == 'GivenFLY'  # Replace with your GitHub username
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
 
     steps:
       - name: Checkout Repository
@@ -18,34 +22,32 @@ jobs:
           python-version: '3.12'
 
       - name: Install Poetry
-        run: |
-          pip install poetry
-          poetry install
+        run: pip install poetry
 
-      - name: Install PyInstaller
-        run: poetry run pip install pyinstaller
-
-      - name: Extract Version from pyproject.toml
+      - name: Get version
         id: get_version
-        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+        run: echo "::set-output name=VERSION::$(poetry version -s)"
 
       - name: Build EXE with PyInstaller
-        run: poetry run pyinstaller --onefile main.py
+        run: |
+          poetry install
+          poetry run pip install pyinstaller
+          poetry run pyinstaller --onefile main.py
 
-      - name: Rename EXE with Version
-        run: mv dist/main.exe dist/main-${{ env.VERSION }}.exe
+      - name: Rename EXE
+        run: mv dist/main.exe dist/main-${{ steps.get_version.outputs.VERSION }}.exe
 
-      - name: Upload EXE as an Artifact
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: built-exe
-          path: dist/main-${{ env.VERSION }}.exe
+          path: dist/main-${{ steps.get_version.outputs.VERSION }}.exe
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Download EXE artifact
@@ -54,15 +56,11 @@ jobs:
           name: built-exe
           path: dist/
 
-      - name: Extract Version from pyproject.toml
-        id: get_version
-        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.VERSION }}
-          name: Release v${{ env.VERSION }}
-          files: dist/main-${{ env.VERSION }}.exe
+          tag_name: v${{ needs.build.outputs.version }}
+          name: Release v${{ needs.build.outputs.version }}
+          files: dist/main-${{ needs.build.outputs.version }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
