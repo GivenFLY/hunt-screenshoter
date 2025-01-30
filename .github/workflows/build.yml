@@ -1,0 +1,68 @@
+name: Build and Release EXE
+
+on:
+  workflow_dispatch:  # Only runs when manually triggered
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: github.actor == 'YourGitHubUsername'  # Replace with your GitHub username
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+          poetry install
+
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
+
+      - name: Extract Version from pyproject.toml
+        id: get_version
+        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+
+      - name: Build EXE with PyInstaller
+        run: poetry run pyinstaller --onefile main.py
+
+      - name: Rename EXE with Version
+        run: mv dist/main.exe dist/main-${{ env.VERSION }}.exe
+
+      - name: Upload EXE as an Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-exe
+          path: dist/main-${{ env.VERSION }}.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download EXE artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: built-exe
+          path: dist/
+
+      - name: Extract Version from pyproject.toml
+        id: get_version
+        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release v${{ env.VERSION }}
+          files: dist/main-${{ env.VERSION }}.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

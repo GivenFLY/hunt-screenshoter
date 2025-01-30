@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "hunt-screenshoter"
+version = "1.0.0"
+description = ""
+authors = ["GivenFLY <alexey.givenfly.moshura@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+keyboard = "^0.13.5"
+pygetwindow = "^0.0.9"
+pyautogui = "^0.9.54"
+python-dotenv = "^1.0.1"
+notebook = "^7.3.2"
+tqdm = "^4.67.1"
+pillow = "^11.1.0"
+pandas = "^2.2.3"
+psutil = "^6.1.1"
+mouse = "^0.7.1"
+pynput = "^1.7.7"
+pyinstaller = "^6.11.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
