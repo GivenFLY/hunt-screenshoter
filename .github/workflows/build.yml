@@ -3,6 +3,10 @@ name: Build and Release EXE
 on:
   workflow_dispatch:
 
+  push:
+    branches:
+      - master
+
 permissions:
   contents: write
 
