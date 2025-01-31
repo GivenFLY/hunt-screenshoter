@@ -71,6 +71,6 @@ jobs:
         with:
           tag_name: v${{ needs.build.outputs.version }}
           name: Release v${{ needs.build.outputs.version }}
-          files: dist/main-${{ needs.build.outputs.version }}.exe
+          files: dist/hunt-screenshoter-${{ needs.build.outputs.version }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
