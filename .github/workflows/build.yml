@@ -40,8 +40,8 @@ jobs:
       - name: Obfuscate Code with PyArmor 8
         run: |
           mkdir obf
-          poetry run pyarmor gen --output obf main.py
-          ls obf  # Debug: Check generated files
+          poetry run pyarmor gen --recursive --output obf .
+          ls obf
 
       - name: Build EXE with PyInstaller (Disable UPX, Keep Console)
         run: |
