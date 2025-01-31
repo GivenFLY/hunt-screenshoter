@@ -30,30 +30,28 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "::set-output name=VERSION::$(poetry version -s)"
+        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
 
-      - name: Install Dependencies (PyInstaller + PyArmor)
+      - name: Install Dependencies (PyInstaller + PyArmor 8)
         run: |
           poetry install
           poetry run pip install pyinstaller pyarmor
 
-      - name: Obfuscate Code with PyArmor
+      - name: Obfuscate Code with PyArmor 8
         run: |
           mkdir obf
-          poetry run pyarmor obfuscate --exact main.py -O obf
+          poetry run pyarmor gen --output obf main.py
+          ls obf  # Debug: Check generated files
 
       - name: Build EXE with PyInstaller (Disable UPX, Keep Console)
         run: |
-          poetry run pyinstaller --onefile --noupx obf/main.py
-
-      - name: Rename EXE
-        run: mv dist/main.exe dist/main-${{ steps.get_version.outputs.VERSION }}.exe
+          poetry run pyinstaller --onefile --noupx --name hunt-screenshoter-${{ env.VERSION }} obf/main.py
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: built-exe
-          path: dist/main-${{ steps.get_version.outputs.VERSION }}.exe
+          path: dist/hunt-screenshoter-${{ env.VERSION }}.exe
 
   release:
     needs: build
