@@ -30,7 +30,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "VERSION=$(poetry version -s)" >> $GITHUB_ENV
+        run: echo "::set-output name=VERSION::$(poetry version -s)"
 
       - name: Install Dependencies (PyInstaller + PyArmor 8)
         run: |
@@ -45,13 +45,13 @@ jobs:
 
       - name: Build EXE with PyInstaller (Disable UPX, Keep Console)
         run: |
-          poetry run pyinstaller --onefile --noupx --name hunt-screenshoter-${{ env.VERSION }} obf/main.py
+          poetry run pyinstaller --onefile --noupx --name hunt-screenshoter-${{ steps.get_version.outputs.VERSION }} obf/main.py
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: built-exe
-          path: dist/hunt-screenshoter-${{ env.VERSION }}.exe
+          path: dist/hunt-screenshoter-${{ steps.get_version.outputs.VERSION }}.exe
 
   release:
     needs: build
