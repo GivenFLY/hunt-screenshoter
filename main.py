@@ -22,4 +22,5 @@ if __name__ == "__main__":
         # In case there's an unexpected error
         _log = setup_logging(crash=True)
         _log.error(f"An error occurred: {e}")
+        input("Press Enter to exit...")
         raise

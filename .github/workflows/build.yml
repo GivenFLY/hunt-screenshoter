@@ -37,15 +37,11 @@ jobs:
           poetry install
           poetry run pip install pyinstaller pyarmor
 
-      - name: Obfuscate Code with PyArmor 8
-        run: |
-          mkdir obf
-          poetry run pyarmor gen --recursive --output obf .
-          ls obf
+      - name: Obfuscate and build Code with PyArmor 8
+        run: poetry run pyarmor gen --pack onefile main.py
 
-      - name: Build EXE with PyInstaller (Disable UPX, Keep Console)
-        run: |
-          poetry run pyinstaller --onefile --noupx --name hunt-screenshoter-${{ steps.get_version.outputs.VERSION }} obf/main.py
+      - name: Rename the output file
+        run: mv dist/main.exe dist/hunt-screenshoter-${{ steps.get_version.outputs.VERSION }}.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
